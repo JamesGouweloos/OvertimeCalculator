@@ -1,6 +1,10 @@
 # Firebase App Hosting configuration
 runtime: python312
 
+# Explicitly specify that we're using a Dockerfile
+# Firebase will use this Dockerfile for building the container
+dockerfile: Dockerfile
+
 env:
   - variable: PORT
     value: "8080"
@@ -9,6 +13,7 @@ env:
 
 build:
   commands:
+    - echo "Building Python Flask application"
     - python --version
     - pip install --upgrade pip
     - pip install -r requirements.txt
