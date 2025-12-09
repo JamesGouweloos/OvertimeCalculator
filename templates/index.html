@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Overtime Analysis Platform</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Overtime Analysis Platform</h1>
+            <p class="subtitle">Process and analyze staff overtime data</p>
+        </header>
+
+        <div class="main-content">
+            <!-- File Upload Section -->
+            <section class="card upload-section">
+                <h2>Upload Overtime File</h2>
+                <div class="upload-area" id="uploadArea">
+                    <input type="file" id="fileInput" accept=".xlsx,.xls" style="display: none;">
+                    <div class="upload-content">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                        <p>Click to upload or drag and drop</p>
+                        <p class="file-info">Excel files (.xlsx, .xls)</p>
+                    </div>
+                </div>
+                <div id="uploadStatus" class="status-message"></div>
+            </section>
+
+            <!-- Statistics Overview -->
+            <section class="card stats-section" id="statsSection" style="display: none;">
+                <h2>Overall Statistics</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Total Overtime Hours</div>
+                        <div class="stat-value" id="totalOvertime">0</div>
+                        <div class="stat-subvalue" id="totalOvertimeHHMMSS">00:00:00</div>
+                        <div class="stat-subvalue" id="totalOvertimeDDHHMMSS">00:00:00:00</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Average Overtime Hours</div>
+                        <div class="stat-value" id="avgOvertime">0</div>
+                        <div class="stat-subvalue" id="avgOvertimeHHMMSS">00:00:00</div>
+                        <div class="stat-subvalue" id="avgOvertimeDDHHMMSS">00:00:00:00</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Total Hours Worked</div>
+                        <div class="stat-value" id="totalHours">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Unique Employees</div>
+                        <div class="stat-value" id="uniqueEmployees">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Total Records</div>
+                        <div class="stat-value" id="totalRecords">0</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Charts Section -->
+            <section class="card charts-section" id="chartsSection" style="display: none;">
+                <h2>Visualizations</h2>
+                <div class="charts-grid">
+                    <div class="chart-container">
+                        <h3>Overtime by Month</h3>
+                        <canvas id="monthChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3>Daily Overtime Trend</h3>
+                        <canvas id="dailyChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3>Top 10 Employees by Overtime</h3>
+                        <canvas id="topEmployeesChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Data Tables Section -->
+            <section class="card tables-section" id="tablesSection" style="display: none;">
+                <div class="tabs">
+                    <button class="tab-button active" onclick="showTab('employeeTab')">By Employee</button>
+                    <button class="tab-button" onclick="showTab('monthTab')">By Month</button>
+                    <button class="tab-button" onclick="showTab('topTab')">Top Employees</button>
+                </div>
+
+                <div id="employeeTab" class="tab-content active">
+                    <h3>Summary by Employee</h3>
+                    <div class="table-container">
+                        <table id="employeeTable" class="data-table filterable-table">
+                            <thead>
+                                <tr class="filter-row">
+                                    <th><input type="text" class="table-filter" placeholder="Filter PIN..." data-column="0"></th>
+                                    <th><input type="text" class="table-filter" placeholder="Filter Name..." data-column="1"></th>
+                                    <th><input type="text" class="table-filter" placeholder="Filter Hours..." data-column="2"></th>
+                                    <th><input type="text" class="table-filter" placeholder="Filter HH:MM:SS..." data-column="3"></th>
+                                    <th><input type="text" class="table-filter" placeholder="Filter DD:HH:MM:SS..." data-column="4"></th>
+                                    <th><input type="text" class="table-filter" placeholder="Filter Avg..." data-column="5"></th>
+                                    <th><input type="text" class="table-filter" placeholder="Filter Avg HH:MM:SS..." data-column="6"></th>
+                                    <th><input type="text" class="table-filter" placeholder="Filter Avg DD:HH:MM:SS..." data-column="7"></th>
+                                    <th><input type="text" class="table-filter" placeholder="Filter Days..." data-column="8"></th>
+                                    <th><input type="text" class="table-filter" placeholder="Filter Total..." data-column="9"></th>
+                                </tr>
+                                <tr>
+                                    <th class="sortable" data-column="0" data-type="number">PIN Code</th>
+                                    <th class="sortable" data-column="1" data-type="text">Full Name</th>
+                                    <th class="sortable" data-column="2" data-type="number">Total Overtime (hrs)</th>
+                                    <th class="sortable" data-column="3" data-type="text">Total Overtime (HH:MM:SS)</th>
+                                    <th class="sortable" data-column="4" data-type="text">Total Overtime (DD:HH:MM:SS)</th>
+                                    <th class="sortable" data-column="5" data-type="number">Avg Overtime (hrs)</th>
+                                    <th class="sortable" data-column="6" data-type="text">Avg Overtime (HH:MM:SS)</th>
+                                    <th class="sortable" data-column="7" data-type="text">Avg Overtime (DD:HH:MM:SS)</th>
+                                    <th class="sortable" data-column="8" data-type="number">Days Worked</th>
+                                    <th class="sortable" data-column="9" data-type="number">Total Hours</th>
+                                </tr>
+                            </thead>
+                            <tbody id="employeeTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="monthTab" class="tab-content">
+                    <h3>Summary by Month</h3>
+                    <div class="table-container">
+                        <table id="monthTable" class="data-table filterable-table">
+                            <thead>
+                                <tr class="filter-row">
+                                    <th><input type="text" class="table-filter" placeholder="Filter Month..." data-column="0"></th>
+                                    <th><input type="text" class="table-filter" placeholder="Filter Hours..." data-column="1"></th>
+                                    <th><input type="text" class="table-filter" placeholder="Filter HH:MM:SS..." data-column="2"></th>
+                                    <th><input type="text" class="table-filter" placeholder="Filter DD:HH:MM:SS..." data-column="3"></th>
+                                    <th><input type="text" class="table-filter" placeholder="Filter Avg..." data-column="4"></th>
+                                    <th><input type="text" class="table-filter" placeholder="Filter Avg HH:MM:SS..." data-column="5"></th>
+                                    <th><input type="text" class="table-filter" placeholder="Filter Avg DD:HH:MM:SS..." data-column="6"></th>
+                                    <th><input type="text" class="table-filter" placeholder="Filter Total..." data-column="7"></th>
+                                    <th><input type="text" class="table-filter" placeholder="Filter Employees..." data-column="8"></th>
+                                </tr>
+                                <tr>
+                                    <th class="sortable" data-column="0" data-type="text">Month</th>
+                                    <th class="sortable" data-column="1" data-type="number">Total Overtime (hrs)</th>
+                                    <th class="sortable" data-column="2" data-type="text">Total Overtime (HH:MM:SS)</th>
+                                    <th class="sortable" data-column="3" data-type="text">Total Overtime (DD:HH:MM:SS)</th>
+                                    <th class="sortable" data-column="4" data-type="number">Avg Overtime (hrs)</th>
+                                    <th class="sortable" data-column="5" data-type="text">Avg Overtime (HH:MM:SS)</th>
+                                    <th class="sortable" data-column="6" data-type="text">Avg Overtime (DD:HH:MM:SS)</th>
+                                    <th class="sortable" data-column="7" data-type="number">Total Hours</th>
+                                    <th class="sortable" data-column="8" data-type="number">Unique Employees</th>
+                                </tr>
+                            </thead>
+                            <tbody id="monthTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="topTab" class="tab-content">
+                    <h3>Top Employees by Overtime</h3>
+                    <div class="table-container">
+                        <table id="topTable" class="data-table filterable-table">
+                            <thead>
+                                <tr class="filter-row">
+                                    <th><input type="text" class="table-filter" placeholder="Filter Rank..." data-column="0"></th>
+                                    <th><input type="text" class="table-filter" placeholder="Filter PIN..." data-column="1"></th>
+                                    <th><input type="text" class="table-filter" placeholder="Filter Name..." data-column="2"></th>
+                                    <th><input type="text" class="table-filter" placeholder="Filter Hours..." data-column="3"></th>
+                                    <th><input type="text" class="table-filter" placeholder="Filter HH:MM:SS..." data-column="4"></th>
+                                    <th><input type="text" class="table-filter" placeholder="Filter DD:HH:MM:SS..." data-column="5"></th>
+                                    <th><input type="text" class="table-filter" placeholder="Filter Avg..." data-column="6"></th>
+                                    <th><input type="text" class="table-filter" placeholder="Filter Avg HH:MM:SS..." data-column="7"></th>
+                                    <th><input type="text" class="table-filter" placeholder="Filter Days..." data-column="8"></th>
+                                </tr>
+                                <tr>
+                                    <th class="sortable" data-column="0" data-type="number">Rank</th>
+                                    <th class="sortable" data-column="1" data-type="number">PIN Code</th>
+                                    <th class="sortable" data-column="2" data-type="text">Full Name</th>
+                                    <th class="sortable" data-column="3" data-type="number">Total Overtime (hrs)</th>
+                                    <th class="sortable" data-column="4" data-type="text">Total Overtime (HH:MM:SS)</th>
+                                    <th class="sortable" data-column="5" data-type="text">Total Overtime (DD:HH:MM:SS)</th>
+                                    <th class="sortable" data-column="6" data-type="number">Avg Overtime (hrs)</th>
+                                    <th class="sortable" data-column="7" data-type="text">Avg Overtime (HH:MM:SS)</th>
+                                    <th class="sortable" data-column="8" data-type="number">Days Worked</th>
+                                </tr>
+                            </thead>
+                            <tbody id="topTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Export Section -->
+            <section class="card export-section" id="exportSection" style="display: none;">
+                <h2>Export Data</h2>
+                <button class="btn btn-primary" onclick="exportSummary()">Export Summary to Excel</button>
+            </section>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
+

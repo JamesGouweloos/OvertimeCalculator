@@ -1,0 +1,17 @@
+# Firebase App Hosting configuration
+runtime: python312
+
+env:
+  - variable: PORT
+    value: "8080"
+  - variable: FLASK_ENV
+    value: "production"
+
+build:
+  commands:
+    - pip install --upgrade pip
+    - pip install -r requirements.txt
+
+run:
+  command: gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --threads 2 --timeout 120 --access-logfile - --error-logfile -
+
