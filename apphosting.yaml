@@ -9,9 +9,11 @@ env:
 
 build:
   commands:
+    - python --version
     - pip install --upgrade pip
     - pip install -r requirements.txt
+    - python -c "import flask; print('Flask installed')"
+    - python -c "import gunicorn; print('Gunicorn installed')"
 
 run:
   command: gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --threads 2 --timeout 120 --access-logfile - --error-logfile -
-
