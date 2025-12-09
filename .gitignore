@@ -48,4 +48,5 @@ ui-debug.log
 # Node modules
 node_modules/
 package-lock.json
-# Note: package.json is kept for Firebase CLI but excluded from builds via .gcloudignore
+# package.json is kept locally for Firebase CLI but not committed to avoid Node.js detection
+package.json
