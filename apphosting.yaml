@@ -1,10 +1,6 @@
 # Firebase App Hosting configuration
 runtime: python312
 
-# Explicitly specify that we're using a Dockerfile
-# Firebase will use this Dockerfile for building the container
-dockerfile: Dockerfile
-
 env:
   - variable: PORT
     value: "8080"
@@ -17,8 +13,6 @@ build:
     - python --version
     - pip install --upgrade pip
     - pip install -r requirements.txt
-    - python -c "import flask; print('Flask installed')"
-    - python -c "import gunicorn; print('Gunicorn installed')"
 
 run:
   command: gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --threads 2 --timeout 120 --access-logfile - --error-logfile -
